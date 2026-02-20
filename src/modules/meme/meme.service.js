@@ -1,7 +1,7 @@
-// const Meme = require('../../models/Meme');
+const Meme = require('../../models/Meme');
 
-// async function createMeme(data){
-//     return await Meme.create(data)
-// }
+async function createMeme(data){
+    return await Meme.create(data)
+}
 
-// module.exports = {createMeme}
+module.exports = {createMeme}

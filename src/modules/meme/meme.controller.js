@@ -1,18 +1,25 @@
-// const memeService = require('./meme.service');
+const memeService = require('./meme.service');
 
-// async function handleCrateMeme(ctx, next){
-//     const photo = ctx.message.photo.at(-1).file_id;
-//     const caption = ctx.message.caption || '';
+async function handleCreateMeme(ctx, next){
+    try {
+        const photo = ctx.message.photo.at(-1).file_id;
+        const caption = ctx.message.caption || '';
 
-//     await memeService.createMeme({
-//         autherId: ctx.dbUSer._id,
-//         imageFileId: photo,
-//         caption
-//     });
+        const newMeme = await memeService.createMeme({
+            authorId: ctx.dbUser._id,
+            imageFileId: photo,
+            caption: caption
+        });
 
-//     console.log('Meme created ✅');
-//     await ctx.reply('Мем додано ✅');
-//     return next();
-// }
+        console.log(`Meme created ✅ ID: ${newMeme._id}`);
+        await ctx.reply('Мем додано до черги✅');
+        return next();
 
-// module.exports = {handleCrateMeme};
+    } catch (error) {
+        console.error('Помилка при створенні мему:', error);
+        await ctx.reply('Вибач, не вдалося зберегти мем.');
+    }
+}
+
+
+module.exports = {handleCreateMeme};
