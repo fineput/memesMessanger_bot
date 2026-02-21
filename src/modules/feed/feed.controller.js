@@ -6,7 +6,7 @@ async function handleShowFeed(ctx, next) {
         const meme = await feedService.getNextMemeForUser(ctx.dbUser._id);
 
         if(!meme) {
-            return ctx.reply('На сьогодні меми закінчилися! Спробуй пізніше або додай свій 📺')
+            return ctx.reply('На сьогодні меми закінчилися! Спробуй пізніше або додай свій 📺');
         }
 
         if(ctx.callbackQuery){

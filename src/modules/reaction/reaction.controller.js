@@ -1,6 +1,6 @@
 const reactionService = require('./reaction.service');
 
-async function handleReaction(ctx, next) {
+async function handleReaction(ctx) {
     const callbackData = ctx.callbackQuery.data;
     const [type, memeId] = callbackData.split('_');
 
@@ -21,7 +21,6 @@ async function handleReaction(ctx, next) {
     });
     
     await ctx.answerCbQuery(type === 'like' ? 'Тобі сподобалось! ❤️' : 'Ну, буває... 💩');
-    return next();
 }
 
 

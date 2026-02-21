@@ -2,9 +2,10 @@ require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const connectDB = require('./config/bd');
 const authMiddleware = require('./modules/auth/auth.middleware');
-const {handleCreateMeme} = require('./modules/meme/meme.controller');
+const {handleCreateMeme, handleManagerMemes, handleDeleteMeme} = require('./modules/meme/meme.controller');
 const {handleShowFeed} = require('./modules/feed/feed.controller');
-const {handleReaction} = require('./modules/reaction/reaction.controller')
+const {handleReaction} = require('./modules/reaction/reaction.controller');
+const {handleUser} = require('./modules/user/user.controller');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -26,13 +27,23 @@ bot.start(async (ctx) => {
 })
 
 bot.hears('🖼 Переглянути меми', handleShowFeed);
-bot.action(/^(like|dislike)_.+/, handleReaction);
-bot.action('next_meme', handleShowFeed);
 
-bot.hears('👤 Мій профіль', async (ctx) => {
-    const user = ctx.dbUser;
-    await ctx.reply(`Твій профіль:\n👤 Ім'я: ${ctx.from.first_name}\n🆔 ID: ${user.telegramId}`);
+bot.action(/^(like|dislike)_.+/, handleReaction);
+
+bot.action('open_profile', async (ctx) => {
+    await ctx.deleteMessage();
+    await handleUser(ctx);
 });
+
+bot.action('noop', (ctx) => ctx.answerCbQuery());
+
+bot.action(/^delete_(.+)/, handleDeleteMeme);
+
+bot.action('next_meme', handleShowFeed);
+bot.action('manage_my_memes', handleManagerMemes);
+bot.action(/^manage_(\d+)/, handleManagerMemes);
+ 
+bot.hears('👤 Мій профіль', handleUser);
 
 bot.hears('➕ Додати мем', (ctx) => {
     ctx.reply('Просто надішліть мені картинку з описом (або без), і я її збережу!');
