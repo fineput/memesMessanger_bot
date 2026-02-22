@@ -7,8 +7,18 @@ async function viewMemes(userId) {
 }
 
 async function userReputation(userId) {
-    const user = await User.findOne(userId);
-    return user ? user.reputation : 0;
+    const memes = await Meme.find({authorId: userId});
+
+    if(!memes.length) return 0;
+
+    const totalLikes = memes.reduce((sum, meme) => sum + (meme.likesCount || 0), 0);
+    const totalDislikes = memes.reduce((sum, meme) => sum + (meme.dislikesCount || 0), 0);
+
+    const reputationFromLikes = Math.floor(totalLikes / 3);
+    const reputationFromDislikes = Math.floor(totalDislikes / 3);
+
+    const finalReputation = reputationFromLikes - reputationFromDislikes;
+    return finalReputation;
 }
 
 async function getMyMemeByPage(userId, index){
