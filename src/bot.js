@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Telegraf, session } = require('telegraf');
+const http = require('http');
 const connectDB = require('./config/bd');
 const authMiddleware = require('./modules/auth/auth.middleware');
 const {handleCreateMeme, handleManagerMemes, handleDeleteMeme, handleAddMemeRequest} = require('./modules/meme/meme.controller');
@@ -60,10 +61,25 @@ bot.hears('➕ Додати мем', handleAddMemeRequest);
 bot.on('photo', handleCreateMeme);
 
 async function bootstrap() {
-    await connectDB();
-    await bot.launch();
-    console.log('Bot started ✅');
+    try {
+        await connectDB();
+        bot.launch().then(() => {
+            console.log('Bot started on Telegram✅');
+        });
+        
+        process.once('SIGINT', () => bot.stop('SIGINT'));
+        process.once('SIGTERM', () => bot.stop('SIGTERM'));
+        
+    } catch (error) {
+        console.error('Помилка при запуску:', error);
+    }
+
 }
 
 bootstrap();
+// порожній сервер для Render
+http.createServer((req, res) => {
+  res.write('Bot is running');
+  res.end();
+}).listen(process.env.PORT || 3000);
 
