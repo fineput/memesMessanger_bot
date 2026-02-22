@@ -1,13 +1,14 @@
 require('dotenv').config();
-const { Telegraf } = require('telegraf');
+const { Telegraf, session } = require('telegraf');
 const connectDB = require('./config/bd');
 const authMiddleware = require('./modules/auth/auth.middleware');
-const {handleCreateMeme, handleManagerMemes, handleDeleteMeme} = require('./modules/meme/meme.controller');
+const {handleCreateMeme, handleManagerMemes, handleDeleteMeme, handleAddMemeRequest} = require('./modules/meme/meme.controller');
 const {handleShowFeed} = require('./modules/feed/feed.controller');
 const {handleReaction} = require('./modules/reaction/reaction.controller');
 const {handleUser} = require('./modules/user/user.controller');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+bot.use(session());
 
 bot.use(authMiddleware);
 
@@ -45,10 +46,7 @@ bot.action(/^manage_(\d+)/, handleManagerMemes);
  
 bot.hears('👤 Мій профіль', handleUser);
 
-bot.hears('➕ Додати мем', (ctx) => {
-    ctx.reply('Просто надішліть мені картинку з описом (або без), і я її збережу!');
-});
-
+bot.hears('➕ Додати мем', handleAddMemeRequest);
 bot.on('photo', handleCreateMeme);
 
 async function bootstrap() {

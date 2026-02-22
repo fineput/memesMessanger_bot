@@ -3,21 +3,36 @@ const Viewed = require('../../models/Viewed');
 
 async function handleShowFeed(ctx, next) {
     try {
+        if (!ctx.callbackQuery && ctx.message) {
+            await ctx.deleteMessage(ctx.message.message_id).catch(() => {});
+        }
         const meme = await feedService.getNextMemeForUser(ctx.dbUser._id);
 
         if(!meme) {
-            return ctx.reply('На сьогодні меми закінчилися! Спробуй пізніше або додай свій 📺');
+            if(ctx.session?.lastMsgId){
+                await ctx.deleteMessage(ctx.session.lastMsgId).catch(() => {});
+            }
+            if (ctx.callbackQuery) {
+                await ctx.deleteMessage().catch(() => {});
+            }
+            const sentMsg = await ctx.reply('На сьогодні меми закінчилися! Спробуй пізніше або додай свій 📺');
+            ctx.session.lastMsgId = sentMsg.message_id;
+            if (ctx.callbackQuery) await ctx.answerCbQuery().catch(() => {});
+            return;
         }
 
         if(ctx.callbackQuery){
-            try {
-                await ctx.deleteMessage();
-            } catch (error) {
-                
+            await ctx.deleteMessage().catch(() => {});
+        } else {
+            await ctx.deleteMessage().catch(() => {});
+
+            if(ctx.session?.lastMsgId){
+                await ctx.deleteMessage(ctx.session.lastMsgId).catch(() => {});
+                ctx.session.lastMsgId = null;
             }
         }
 
-        await ctx.replyWithPhoto(meme.imageFileId, {
+        const sentMsg = await ctx.replyWithPhoto(meme.imageFileId, {
             caption: meme.caption || '',
             reply_markup: {
                 inline_keyboard: [
@@ -30,16 +45,19 @@ async function handleShowFeed(ctx, next) {
             }
         });
 
+        ctx.session.lastMsgId = sentMsg.message_id;
+
         await Viewed.create({
             userId: ctx.dbUser._id,
             memeId: meme._id
         });
 
-        if(ctx.callbackQuery) await ctx.answerCbQuery();
-        return next();
+        if(ctx.callbackQuery) await ctx.answerCbQuery().catch(() => {});
+        if(next) return next();
     } catch (error) {
         console.log('Feed error:', error);
         ctx.reply('Сталася помилка при завантаженні стрічки 😵‍💫');
+        ctx.session.lastMsgId = error.message_id;
     }
 }
 
