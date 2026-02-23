@@ -24,6 +24,7 @@ async function handleAddMemeRequest(ctx) {
 
 async function handleCreateMeme(ctx){
     if(!ctx.message.photo) return;
+    if (!ctx.session) ctx.session = {};
 
     try {
         const photo = ctx.message.photo.at(-1).file_id;
@@ -53,6 +54,7 @@ async function handleCreateMeme(ctx){
 
 async function handleDeleteMeme(ctx) {
     try {
+        if (!ctx.session) ctx.session = {};
         const memeId = ctx.callbackQuery.data.split('_')[1];
         const userId = ctx.dbUser._id;
 
@@ -69,6 +71,7 @@ async function handleDeleteMeme(ctx) {
 
 async function handleManagerMemes(ctx) {
     try {
+        if (!ctx.session) ctx.session = {};
         const data = ctx.callbackQuery.data || '';
         const index = Number(data.split('_')[1]) || 0;
         const userId = ctx.dbUser._id;

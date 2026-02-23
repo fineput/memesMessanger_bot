@@ -2,12 +2,16 @@ const userService = require('./user.service');
 
 async function handleUser(ctx) {
     try {
+        if (!ctx.session) ctx.session = {};
         const userId = ctx.dbUser._id;
 
-        await ctx.deleteMessage().catch(() => {});
+        if (!ctx.callbackQuery) {
+            await ctx.deleteMessage().catch(() => {});
+        }
         
         if(ctx.session?.lastMsgId){
             await ctx.deleteMessage(ctx.session.lastMsgId).catch(() => {});
+            ctx.session.lastMsgId = null;
         }
 
         const [memeCount, reputation] = await Promise.all([
@@ -21,7 +25,7 @@ async function handleUser(ctx) {
                         `🖼 Завантажено мемів: ${memeCount}`;
 
         const extra = {
-            parse_mode: 'MarkdownV2',
+            parse_mode: 'Markdown',
             reply_markup: {
                 inline_keyboard: [[{ text: '🖼 Керувати мемами', callback_data: 'manage_my_memes' }]]
             }
@@ -31,8 +35,6 @@ async function handleUser(ctx) {
 
         const sentMsg = await ctx.reply(formattedMsg, extra);
 
-        
-        if(!ctx.session) ctx.session = {};
         ctx.session.lastMsgId = sentMsg.message_id;
     } catch (error) {
         console.error('Profile Controller Error: ', error);

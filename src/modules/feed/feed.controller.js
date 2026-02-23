@@ -3,6 +3,7 @@ const Viewed = require('../../models/Viewed');
 
 async function handleShowFeed(ctx, next) {
     try {
+        if (!ctx.session) ctx.session = {};
         if (!ctx.callbackQuery && ctx.message) {
             await ctx.deleteMessage(ctx.message.message_id).catch(() => {});
         }
@@ -47,17 +48,22 @@ async function handleShowFeed(ctx, next) {
 
         ctx.session.lastMsgId = sentMsg.message_id;
 
-        await Viewed.create({
-            userId: ctx.dbUser._id,
-            memeId: meme._id
-        });
+        try {
+            await Viewed.create({
+                userId: ctx.dbUser._id,
+                memeId: meme._id
+            });
+        } catch (error) {
+            if(error.code !== 11000) console.error('View log error:', error);
+        }
 
         if(ctx.callbackQuery) await ctx.answerCbQuery().catch(() => {});
         if(next) return next();
+
     } catch (error) {
         console.log('Feed error:', error);
-        ctx.reply('Сталася помилка при завантаженні стрічки 😵‍💫');
-        ctx.session.lastMsgId = error.message_id;
+        const sentMsg = await ctx.reply('Сталася помилка при завантаженні стрічки 😵‍💫');
+        if(sentMsg) ctx.session.lastMsgId = sentMsg.message_id;
     }
 }
 
