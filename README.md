@@ -44,28 +44,28 @@ Ensure you have the following installed:
 * **MongoDB** (Local instance or Atlas cluster)
 
 ### 2. Clone the Repository
-\`\`\`bash
+```bash
 git clone https://github.com/fineput/memesMessanger_bot.git
 cd memesMessanger_bot
-\`\`\`
+```
 
 ### 3. Install Dependencies
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 ### 4. Configuration
 Create a \`.env\` file in the root directory and add your credentials:
-\`\`\`env
+```env
 BOT_TOKEN=your_telegram_bot_token
 MONGO_URI=your_mongodb_connection_string
-\`\`\`
+```
 
 ### 5. Running the Bot
 **Start the application:**
-\`\`\`bash
+```bash
 npm start
-\`\`\`
+```
 
 ## 🔄 Logic Flow
 
