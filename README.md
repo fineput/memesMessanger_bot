@@ -25,13 +25,13 @@ A robust Telegram bot designed for seamless meme sharing, management, and storag
 
 ## 📁 Project Structure
 
-\`\`\`text
+```
 src/
  ├── bot.js          # Bot initialization & entry point
  ├── config/       # Command logic & message processing
  ├── models/       # Schema definitions & MongoDB connection
  └── modules/          # Helper functions & validation logic
-\`\`\`
+```
 
 ## ⚙️ Installation & Setup
 
